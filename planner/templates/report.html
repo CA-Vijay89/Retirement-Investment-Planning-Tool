@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial;
+      font-size: 14px;
+    }
+
+    h2, h3 {
+      color: #0d6efd;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 6px;
+    }
+
+    img {
+      width: 100%;
+      margin-top: 10px;
+      max-height: 450px;
+      object-fit: contain;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .keep-together {
+      page-break-inside: avoid;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>AI-Powered Retirement Planning Report</h2>
+
+<p class="note">
+  This report is generated using an AI-driven tool.
+  Risk profile is recommended by a machine learning model based on user inputs like age, education etc.
+</p>
+
+<div class="section">
+  <h3>Executive Summary</h3>
+  <p>{{ executive_summary }}</p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="section">
+  <h3>User Input Summary</h3>
+  <table>
+    <tr><th>Age</th><td>{{ inputs.age }}</td></tr>
+    <tr><th>Gender</th><td>{{ inputs.gender }}</td></tr>
+    <tr><th>Education</th><td>{{ inputs.education }}</td></tr>
+    <tr><th>Field</th><td>{{ inputs.field }}</td></tr>
+    <tr><th>Monthly Expenses</th><td>₹{{ inputs.expenses|floatformat:0 }}</td></tr>
+    <tr><th>Retirement Age</th><td>{{ inputs.retirement_age }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Retirement Summary</h3>
+  <table>
+    <tr><th>Risk Profile</th><td>{{ result.risk }}</td></tr>
+    <tr><th>Investment Period</th><td>{{ result.investment_years }} years</td></tr>
+    <tr><th>Projected Monthly Expense</th><td>₹{{ result.projected_expenses|floatformat:0 }}</td></tr>
+    <tr><th>Required Corpus</th><td>₹{{ result.corpus_required|floatformat:0 }}</td></tr>
+    <tr><th>Monthly SIP</th><td>₹{{ result.monthly_sip|floatformat:0 }}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Monthly SIP Allocation</h3>
+  <table>
+    <tr>
+      <th>Asset Class</th>
+      <th>Allocation %</th>
+      <th>Monthly SIP (₹)</th>
+    </tr>
+    {% for asset, pct, sip in asset_sip_table %}
+    <tr>
+      <td>{{ asset }}</td>
+      <td>{{ pct }}%</td>
+      <td>₹{{ sip|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="section">
+  <h3>Risk Profile Explanation</h3>
+  <p>{{ risk_description }}</p>
+</div>
+
+<div class="page-break"></div>
+
+<!-- BOTH CHARTS ON SAME PAGE -->
+<div class="section keep-together">
+  <h3>SIP Allocation</h3>
+  {% if charts.allocation %}
+    <img src="{{ charts.allocation }}">
+  {% endif %}
+
+  <h3 style="margin-top: 24px;">SIP Growth Over Time</h3>
+  {% if charts.growth %}
+    <img src="{{ charts.growth }}">
+  {% endif %}
+</div>
+
+<div class="section">
+  <h3>Investment Assumptions - Annualised Rates based on historical data</h3>
+  <table>
+    <tr><th>Inflation</th><td>{{ assumptions.inflation }}%</td></tr>
+    <tr><th>Annuity Rate</th><td>{{ assumptions.annuity }}%</td></tr>
+    {% for a, v in assumptions.returns.items %}
+    <tr><th>{{ a }} CAGR</th><td>{{ v }}%</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="section">
+  <h3>AI Methodology</h3>
+  <p>{{ ai_methodology }}</p>
+</div>
+
+<p class="note">
+  Disclaimer: This report is for educational purposes only and does not constitute financial advice.
+</p>
+
+</body>
+</html>
+
+<div class="section">
+  <h3>Investment Notes</h3>
+</div>
+
+<div class="body">
+  <p>Nifty 50 : Can be construed as an investment in Nifty 50 or other Large Cap funds.</p>
+  <p>Gold & Silver : To be construed as Investments in Gold and Silver ETFs or Mutual funds.</p>
+  <p>FD : To be construed as Recurring Deposit or investments in any Debt Mutual Funds.</p>
+  <p>Tax Impact : Since Income Tax Impact is not considered by the Tool, it is recommended to step up the investments by 10% to 15% based on the Expected Income Tax Rates on the Capital Gains.</p>
+</div>
+
+</body>
+</html>

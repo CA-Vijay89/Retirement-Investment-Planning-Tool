@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Retirement Planner</title>
+    <style>
+        body { font-family: Arial; background: #f4f6f8; }
+        .box {
+            width: 420px;
+            margin: 60px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+        }
+        h2 { text-align: center; }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #2c7be5;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+<div class="box">
+    <h2>AI Retirement Planner</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Generate Plan</button>
+    </form>
+</div>
+</body>
+</html>

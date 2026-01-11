@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+
+  <!-- HEADER -->
+  <div class="row mb-4">
+    <div class="col">
+      <h3 class="fw-bold">Retirement Planner Dashboard</h3>
+      <p class="text-muted">AI-driven retirement planning & SIP recommendation</p>
+
+      {% if result %}
+      <button
+        type="button"
+        onclick="downloadPDF()"
+        class="btn btn-outline-primary btn-sm mt-2">
+        📄 Download Retirement Report (PDF)
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- TOP SECTION -->
+  <div class="row mb-4">
+
+    <!-- USER INPUT FORM -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">User Inputs</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <input name="age" class="form-control mb-2" placeholder="Age" required>
+            <select name="gender" class="form-control mb-2">
+              <option>Male</option><option>Female</option>
+            </select>
+            <select name="education" class="form-control mb-2">
+              <option>Bachelors</option><option>Masters</option>
+            </select>
+            <select name="field" class="form-control mb-2">
+              <option>Finance</option><option>IT</option>
+              <option>Medical</option><option>Teaching</option>
+              <option>Others</option>
+            </select>
+            <input name="expenses" class="form-control mb-2" placeholder="Monthly Expenses ₹" required>
+            <input name="retirement_age" class="form-control mb-3" placeholder="Retirement Age (60)">
+            <button class="btn btn-success w-100">Analyze</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% if result %}
+    <!-- INPUT SUMMARY -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-secondary text-white">Input Summary</div>
+        <div class="card-body">
+          <p>Age: {{ inputs.age }}</p>
+          <p>Gender: {{ inputs.gender }}</p>
+          <p>Education: {{ inputs.education }}</p>
+          <p>Field: {{ inputs.field }}</p>
+          <p>Expenses: ₹{{ inputs.expenses|floatformat:0 }}</p>
+          <p>Retirement Age: {{ inputs.retirement_age }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETIREMENT SUMMARY -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white">Retirement Summary</div>
+        <div class="card-body">
+          <p><strong>Risk Profile:</strong> {{ result.risk }}</p>
+          <p><strong>Investment Years:</strong> {{ result.investment_years }}</p>
+          <p><strong>Projected Expense:</strong> ₹{{ result.projected_expenses|floatformat:0 }}</p>
+          <p><strong>Corpus Required:</strong> ₹{{ result.corpus_required|floatformat:0 }}</p>
+          <h5 class="text-primary">Monthly SIP: ₹{{ result.monthly_sip|floatformat:0 }}</h5>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if result %}
+  <!-- ALLOCATION + ASSUMPTIONS + SIP TABLE -->
+  <div class="row mb-4">
+
+    <!-- PIE CHART -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">SIP Allocation</div>
+        <div class="card-body d-flex justify-content-center">
+          <div style="max-width:300px; height:300px;">
+            <canvas id="allocationChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-lg-6">
+
+      <!-- ASSUMPTIONS -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-secondary text-white">Assumptions Used - Annual Rates based on historical data</div>
+        <div class="card-body">
+          <p>Inflation: {{ assumptions.inflation|floatformat:0 }}%</p>
+          <p>Annuity: {{ assumptions.annuity|floatformat:0 }}%</p>
+          {% for a,v in assumptions.returns.items %}
+            <p>{{ a }}: {{ v|floatformat:0 }}%</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- INVESTMENT SUMMARY TABLE -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          Monthly SIP Allocation (₹)
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Asset Class</th>
+                <th>Allocation %</th>
+                <th>Monthly SIP (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for asset, pct, sip in asset_sip_table %}
+              <tr>
+                <td>{{ asset }}</td>
+                <td>{{ pct|floatformat:0 }}%</td>
+                <td>₹{{ sip|floatformat:0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIP GROWTH -->
+  <div class="row">
+    <div class="col">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          SIP Growth Over Time
+        </div>
+        <div class="card-body d-flex justify-content-center">
+          <div style="width:1000px; height:400px;">
+            <canvas id="sipGrowthChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ✅ Indian number formatting helper
+function formatIndianNumber(x) {
+  return x.toLocaleString('en-IN');
+}
+
+const allocationChart = new Chart(document.getElementById("allocationChart"), {
+  type: 'pie',
+  data: {
+    labels: {{ allocation_labels|safe }},
+    datasets: [{
+      data: {{ allocation_percentages|safe }}
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.label + ': ' + formatIndianNumber(Math.round(context.parsed));
+          }
+        }
+      }
+    }
+  }
+});
+
+const sipGrowthChart = new Chart(document.getElementById("sipGrowthChart"), {
+  type: 'line',
+  data: {
+    labels: {{ growth_years|safe }},
+    datasets: [
+      {
+        label: 'Portfolio Value',
+        data: {{ growth_values|safe }},
+        fill: true,
+        backgroundColor: 'rgba(13,110,253,0.15)',
+        borderColor: 'rgba(13,110,253,1)',
+        tension: 0.35
+      },
+      {
+        label: 'Target Corpus',
+        data: Array({{ growth_years|length }}).fill({{ result.corpus_required|floatformat:0 }}),
+        borderDash: [6,6],
+        borderColor: '#198754',
+        fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ₹' + formatIndianNumber(Math.round(context.parsed.y));
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: function(value) {
+            return '₹' + formatIndianNumber(Math.round(value));
+          }
+        }
+      }
+    }
+  }
+});
+
+function downloadPDF() {
+  fetch("{% url 'store_charts' %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      allocation: allocationChart.toBase64Image(),
+      growth: sipGrowthChart.toBase64Image()
+    })
+  }).then(() => {
+    window.location.href = "{% url 'download_report' %}";
+  });
+}
+</script>
+
+{% endblock %}
