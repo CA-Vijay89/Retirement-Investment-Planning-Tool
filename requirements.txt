@@ -50,7 +50,7 @@ pycairo==1.23.0           # last for Python 3.10
 pycparser==2.21
 pydyf==0.8.0              # last for Python 3.10
 pyHanko==0.18.0           # last for Python 3.10
-pyhanko-certvalidator==0.23.0
+pyhanko-certvalidator==0.22.2
 pyparsing==3.0.9
 pypdf==3.9.0              # last for Python 3.10
 pyphen==0.12.0
