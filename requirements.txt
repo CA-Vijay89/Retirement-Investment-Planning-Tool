@@ -6,7 +6,7 @@ asgiref==3.11.0
 asn1crypto==1.5.1
 astunparse==1.6.3
 brotli==1.2.0
-cachetools==6.2.4
+cachetools==5.3.3
 certifi==2024.8.30
 cffi==2.0.0
 charset-normalizer==3.4.4
