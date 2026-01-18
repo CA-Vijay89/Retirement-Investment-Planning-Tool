@@ -69,13 +69,13 @@ seaborn==0.12.2           # last for Python 3.10
 six==1.16.0
 sqlparse==0.4.4
 svglib==1.5.1             # last for Python 3.10
-tensorboard==2.10.0       # corrected
+tensorflow==2.10.0
+tensorflow-cpu==2.10.0
+tensorflow-estimator==2.10.0
+tensorboard==2.10.0
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
-tensorflow-cpu==2.10.0    # corrected
-tensorflow-intel==2.10.0  # corrected
-tensorflow-estimator==2.10.0
-tensorflow-io-gcs-filesystem==0.27.0 # compatible with TF 2.10
+tensorflow-io-gcs-filesystem==0.27.0
 termcolor==2.2.0
 threadpoolctl==3.1.0      # last for Python 3.10
 tinycss2==1.2.1
