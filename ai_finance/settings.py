@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-@1$!q5e6y9k49t!s+s0t*zpcec+6@^6fkyxjxgi9c$n9=%!$_e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "retirement-investment-planning-tool.onrender.com",
+]
 
 
 # Application definition
